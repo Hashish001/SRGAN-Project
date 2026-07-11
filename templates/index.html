@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SRGAN - Super Resolution</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header class="header">
+      <div class="logo">
+        <h1>SRGAN Super Resolution</h1>
+        <span class="badge">4x Upscaling</span>
+      </div>
+      <div class="status-bar">
+        <div class="status-item">
+          <span class="status-label">Device:</span>
+          <span class="status-value" id="device-info">{{ device }}</span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">Model:</span>
+          <span class="status-value" id="model-status">
+            {% if model_loaded %}
+            <span class="status-active">Active</span>
+            {% else %}
+            <span class="status-error">Not Found</span>
+            {% endif %}
+          </span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Tabs -->
+      <div class="tabs">
+        <button class="tab-btn active" data-tab="single">Single Image</button>
+        <button class="tab-btn" data-tab="compare">Compare</button>
+        <button class="tab-btn" data-tab="batch">Batch Process</button>
+      </div>
+
+      <!-- Tab Content: Single Image -->
+      <div class="tab-content active" id="single-tab">
+        <div class="upload-section">
+          <div class="upload-area" id="single-upload-area">
+            <input type="file" id="single-file-input" accept="image/*" hidden>
+            <div class="upload-placeholder" id="single-placeholder">
+              <div class="upload-icon">+</div>
+              <p>Click or drag image here</p>
+              <span>Supports: JPG, PNG, BMP</span>
+            </div>
+            <div class="preview-container" id="single-preview-container" style="display: none;">
+              <img id="single-preview" class="preview-image" alt="Preview">
+              <button class="remove-btn" id="single-remove-btn">X</button>
+            </div>
+          </div>
+
+          <div class="controls">
+            <div class="control-group">
+              <label for="color-enhance">Color Enhancement</label>
+              <input type="range" id="color-enhance" min="0.5" max="2.0" step="0.05" value="1.2">
+              <span class="range-value" id="color-value">1.2x</span>
+            </div>
+            <div class="control-group">
+              <label for="sharpness-enhance">Sharpness Enhancement</label>
+              <input type="range" id="sharpness-enhance" min="0.5" max="2.0" step="0.05" value="1.1">
+              <span class="range-value" id="sharpness-value">1.1x</span>
+            </div>
+            <button id="process-btn" class="btn-primary" disabled>
+              Process Image
+            </button>
+          </div>
+        </div>
+
+        <div class="loading" id="single-loading" style="display: none;">
+          <div class="spinner"></div>
+          <p>Processing image...</p>
+        </div>
+
+        <div class="results-section" id="single-results" style="display: none;">
+          <h2>Results</h2>
+          <div class="image-comparison">
+            <div class="image-card">
+              <h3>Original Image</h3>
+              <img id="original-image" alt="Original">
+              <div class="image-info">
+                <span id="original-size"></span>
+              </div>
+            </div>
+            <div class="image-card">
+              <h3>Super Resolved (4x)</h3>
+              <img id="result-image" alt="Result">
+              <div class="image-info">
+                <span id="result-size"></span>
+              </div>
+            </div>
+          </div>
+          <div class="processing-info" id="processing-info"></div>
+          <button id="download-btn" class="btn-secondary" style="display: none;">
+            Download Result
+          </button>
+        </div>
+
+        <div class="error-message" id="single-error" style="display: none;"></div>
+      </div>
+
+      <!-- Tab Content: Compare -->
+      <div class="tab-content" id="compare-tab">
+        <div class="upload-section">
+          <div class="upload-area" id="compare-upload-area">
+            <input type="file" id="compare-file-input" accept="image/*" hidden>
+            <div class="upload-placeholder" id="compare-placeholder">
+              <div class="upload-icon">+</div>
+              <p>Click or drag image here to compare</p>
+              <span>Compare SRGAN with Bicubic upscaling</span>
+            </div>
+            <div class="preview-container" id="compare-preview-container" style="display: none;">
+              <img id="compare-preview" class="preview-image" alt="Preview">
+              <button class="remove-btn" id="compare-remove-btn">X</button>
+            </div>
+          </div>
+          <button id="compare-btn" class="btn-primary" disabled>
+            Compare Methods
+          </button>
+        </div>
+
+        <div class="loading" id="compare-loading" style="display: none;">
+          <div class="spinner"></div>
+          <p>Comparing methods...</p>
+        </div>
+
+        <div class="results-section" id="compare-results" style="display: none;">
+          <h2>Comparison Results</h2>
+          <div class="triple-comparison">
+            <div class="image-card">
+              <h3>Original</h3>
+              <img id="compare-original" alt="Original">
+            </div>
+            <div class="image-card">
+              <h3>Bicubic (4x)</h3>
+              <img id="compare-bicubic" alt="Bicubic">
+            </div>
+            <div class="image-card">
+              <h3>SRGAN (4x)</h3>
+              <img id="compare-srgan" alt="SRGAN">
+            </div>
+          </div>
+          <div class="processing-info" id="compare-info"></div>
+        </div>
+      </div>
+
+      <!-- Tab Content: Batch Process -->
+      <div class="tab-content" id="batch-tab">
+        <div class="upload-section">
+          <div class="upload-area batch-upload" id="batch-upload-area">
+            <input type="file" id="batch-file-input" accept="image/*" multiple hidden>
+            <div class="upload-placeholder" id="batch-placeholder">
+              <div class="upload-icon">+</div>
+              <p>Select multiple images</p>
+              <span>Process up to 10 images at once</span>
+            </div>
+          </div>
+          <div id="batch-preview-grid" class="preview-grid"></div>
+          <div class="controls">
+            <div class="control-group">
+              <label for="batch-color">Color Enhancement</label>
+              <input type="range" id="batch-color" min="0.5" max="2.0" step="0.05" value="1.2">
+              <span class="range-value">1.2x</span>
+            </div>
+            <div class="control-group">
+              <label for="batch-sharpness">Sharpness Enhancement</label>
+              <input type="range" id="batch-sharpness" min="0.5" max="2.0" step="0.05" value="1.1">
+              <span class="range-value">1.1x</span>
+            </div>
+            <button id="batch-process-btn" class="btn-primary" disabled>
+              Process All Images
+            </button>
+          </div>
+        </div>
+
+        <div class="loading" id="batch-loading" style="display: none;">
+          <div class="spinner"></div>
+          <p>Processing batch...</p>
+        </div>
+
+        <div class="results-section" id="batch-results" style="display: none;">
+          <h2>Batch Results</h2>
+          <div id="batch-gallery" class="gallery"></div>
+          <button id="batch-download-btn" class="btn-secondary" style="display: none;">
+            Download All Results
+          </button>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>SRGAN Super Resolution | Built with Hassan Ibrahem Hashish</p>
+    </footer>
+  </div>
+
+  <script src="/static/js/main.js"></script>
+</body>
+
+</html>
