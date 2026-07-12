@@ -26,28 +26,38 @@ SRGAN (Super-Resolution Generative Adversarial Network) is a deep learning model
 
 ```text
 SRGAN Project/
-├── main.py                     # FastAPI application
-├── model.py                    # SRGAN Generator architecture
-├── requirements.txt            # Dependencies
-├── README.md                   # Documentation
-├── LICENSE                      # GPL v3 License
-├── SRGAN Generator Model.pth   # Trained model weights
+├── main.py                          # FastAPI application entry point
+├── config.py                        # Configuration settings
+├── model.py                         # SRGAN Generator architecture
+├── requirements.txt                 # Dependencies
+├── README.md                        # Documentation
+├── LICENSE                          # GPL v3 License
+├── SRGAN Generator Model.pth        # Trained model weights
+├── routes/
+│   ├── __init__.py
+│   ├── super_resolve.py             # Super resolution endpoints
+│   ├── compare.py                   # Comparison endpoint
+│   └── admin.py                     # Admin monitoring endpoints
+├── utils/
+│   ├── __init__.py
+│   ├── image_processing.py          # Image processing functions
+│   └── logging_utils.py             # Logging functions
 ├── templates/
-│   └── index.html              # Web interface
+│   └── index.html                   # Web interface
 ├── static/
 │   ├── css/
-│   │   └── style.css           # Styling
+│   │   └── style.css                # Styling
 │   └── js/
-│       └── main.js             # Frontend logic
-├── uploads/                    # Auto-created directories
-│   ├── original/               # Uploaded original images
-│   ├── results/                # Processed SRGAN results
+│       └── main.js                  # Frontend logic
+├── uploads/                         # Auto-created directories
+│   ├── original/                    # Uploaded original images
+│   ├── results/                     # Processed SRGAN results
 │   └── logs/
-│       └── upload_history.json # Upload history
+│       └── upload_history.json      # Upload history
 └── training_results/
-    ├── comparison_results.png  # SRGAN vs Bicubic
-    ├── test_inference.png      # Single image test
-    └── training_history.png    # Training metrics
+    ├── comparison_results.png       # SRGAN vs Bicubic
+    ├── test_inference.png           # Single image test
+    └── training_history.png         # Training metrics
 ```
 ---
 
